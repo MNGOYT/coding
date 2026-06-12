@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cat Clicker Ultimate</title>
+
+<style>
+body {
+  background: #121212;
+  color: white;
+  font-family: Arial;
+  margin: 0;
+  text-align: center;
+}
+
+/* HUD */
+#topbar {
+  background: #1f1f1f;
+  padding: 10px;
+}
+
+/* Canvas */
+#game {
+  margin: 20px auto;
+  display: block;
+  background: radial-gradient(circle, #444, #222);
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+/* SHOP PANEL */
+#shop {
+  position: fixed;
+  right: -270px;
+  top: 0;
+  width: 270px;
+  height: 100%;
+  background: #1c1c1c;
+  padding: 15px;
+  transition: 0.3s;
+  overflow-y: auto;
+}
+
+#shop.open {
+  right: 0;
+}
+
+.shop-btn {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #ff9800;
+  color: white;
+  cursor: pointer;
+}
+
+/* OPEN + CLOSE BUTTON */
+#toggleShop {
+  position: fixed;
+  right: 0;
+  top: 45%;
+  background: #ff9800;
+  padding: 10px;
+  border-radius: 10px 0 0 10px;
+  cursor: pointer;
+}
+
+#closeShop {
+  background: red;
+  margin-bottom: 10px;
+}
+
+/* floating text */
+.float {
+  position: fixed;
+  color: white;
+  pointer-events: none;
+  animation: up 0.8s forwards;
+}
+
+@keyframes up {
+  to {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="topbar">
+  Score: <span id="score">0</span> |
+  Click: <span id="power">1</span> |
+  CPS: <span id="cps">0</span>
+</div>
+
+<canvas id="game" width="300" height="300"></canvas>
+
+<div id="toggleShop" onclick="toggleShop()">SHOP</div>
+
+<div id="shop">
+  <button id="closeShop" onclick="toggleShop()">CLOSE</button>
+  <h2>Shop</h2>
+
+  <button class="shop-btn" onclick="buyPower()"></button>
+  <button class="shop-btn" onclick="buyAuto()"></button>
+  <button class="shop-btn" onclick="buyFactory()"></button>
+  <button class="shop-btn" onclick="buyLab()"></button>
+  <button class="shop-btn" onclick="buyMultiplier()"></button>
+  <button class="shop-btn" onclick="buyMega()"></button>
+
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let score = 0;
+let clickPower = 1;
+let cps = 0;
+
+/* ITEMS */
+let autos = 0;
+let factories = 0;
+let labs = 0;
+let mega = 0;
+let multiplier = 1;
+
+/* COSTS */
+let powerCost = 10;
+let autoCost = 20;
+let factoryCost = 80;
+let labCost = 250;
+let multiCost = 150;
+let megaCost = 500;
+
+// TOGGLE SHOP ✅ FIXED
+function toggleShop() {
+  document.getElementById("shop").classList.toggle("open");
+}
+
+// DRAW CAT (better shading)
+function drawCat(scale=1){
+ctx.clearRect(0,0,300,300)
+ctx.save()
+ctx.translate(150,150)
+ctx.scale(scale,scale)
+
+let g=ctx.createRadialGradient(0,0,20,0,0,90)
+g.addColorStop(0,"#ffd9b3")
+g.addColorStop(1,"#cc8855")
+
+ctx.fillStyle=g
+ctx.beginPath()
+ctx.arc(0,0,80,0,Math.PI*2)
+ctx.fill()
+
+// ears
+ctx.beginPath()
+ctx.moveTo(-50,-40)
+ctx.lineTo(-70,-110)
+ctx.lineTo(-10,-60)
+ctx.fill()
+
+ctx.beginPath()
+ctx.moveTo(50,-40)
+ctx.lineTo(70,-110)
+ctx.lineTo(10,-60)
+ctx.fill()
+
+// eyes
+ctx.fillStyle="white"
+ctx.beginPath()
+ctx.arc(-25,-10,12,0,Math.PI*2)
+ctx.arc(25,-10,12,0,Math.PI*2)
+ctx.fill()
+
+ctx.fillStyle="black"
+ctx.beginPath()
+ctx.arc(-25,-10,6,0,Math.PI*2)
+ctx.arc(25,-10,6,0,Math.PI*2)
+ctx.fill()
+
+// nose
+ctx.fillStyle="pink"
+ctx.beginPath()
+ctx.arc(0,15,8,0,Math.PI*2)
+ctx.fill()
+
+ctx.restore()
+}
+
+// CLICK CAT
+canvas.addEventListener("click",(e)=>{
+let gain=Math.floor(clickPower*multiplier)
+score+=gain
+
+spawnText(e.clientX,e.clientY,"+"+gain)
+
+drawCat(0.92)
+setTimeout(()=>drawCat(1),80)
+
+updateUI()
+})
+
+// FLOAT TEXT
+function spawnText(x,y,text){
+let t=document.createElement("div")
+t.className="float"
+t.style.left=x+"px"
+t.style.top=y+"px"
+t.textContent=text
+document.body.appendChild(t)
+setTimeout(()=>t.remove(),800)
+}
+
+// BUY FUNCTIONS
+function buyPower(){
+if(score>=powerCost){
+score-=powerCost
+clickPower++
+powerCost=Math.floor(powerCost*1.4)
+}}
+
+function buyAuto(){
+if(score>=autoCost){
+score-=autoCost
+autos++
+autoCost=Math.floor(autoCost*1.5)
+}}
+
+function buyFactory(){
+if(score>=factoryCost){
+score-=factoryCost
+factories++
+factoryCost=Math.floor(factoryCost*1.6)
+}}
+
+function buyLab(){
+if(score>=labCost){
+score-=labCost
+labs++
+labCost=Math.floor(labCost*1.7)
+}}
+
+function buyMultiplier(){
+if(score>=multiCost){
+score-=multiCost
+multiplier+=0.5
+multiCost=Math.floor(multiCost*2)
+}}
+
+function buyMega(){
+if(score>=megaCost){
+score-=megaCost
+mega++
+megaCost=Math.floor(megaCost*2)
+}}
+
+// AUTO INCOME
+setInterval(()=>{
+let income = autos*1 + factories*5 + labs*15 + mega*50
+score+=income
+cps=income
+updateUI()
+},1000)
+
+// UI
+function updateUI(){
+document.getElementById("score").textContent=score
+document.getElementById("power").textContent=clickPower
+document.getElementById("cps").textContent=cps
+
+let b=document.querySelectorAll(".shop-btn")
+
+b[0].textContent = "Stronger Click (+1) - " + powerCost
+b[1].textContent = "Auto Clicker (+1/sec) - " + autoCost
+b[2].textContent = "Factory (+5/sec) - " + factoryCost
+b[3].textContent = "Lab (+15/sec) - " + labCost
+b[4].textContent = "Multiplier x"+multiplier.toFixed(1)+" - "+multiCost
+b[5].textContent = "Mega Cat (+50/sec) - " + megaCost
+}
+
+// INIT
+drawCat()
+updateUI()
+</script>
+
+</body>
+</html>
