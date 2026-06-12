@@ -1,1 +1,1 @@
-Please use these wisely
+These are html javascripts
